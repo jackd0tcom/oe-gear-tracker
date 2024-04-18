@@ -101,3 +101,141 @@ class Oe_Deal_Tracker_Admin {
 	}
 
 }
+
+// Hook into the admin menu
+add_action('admin_menu', 'outdoor_empire_deals_admin_menu');
+
+function outdoor_empire_deals_admin_menu() {
+    add_menu_page(
+        'Outdoor Empire Deal Tracker',
+        'Outdoor Empire Deal Tracker',
+        'manage_options',
+        'oe-deal-tracker',
+        'outdoor_empire_deals_admin_page_content',
+        'dashicons-money-alt',
+        20
+    );
+}
+
+function outdoor_empire_deals_admin_page_content() {
+    if (!current_user_can('manage_options')) {
+        return;
+    }
+
+    echo '<h1>Outdoor Empire Deal Tracker Admin</h1>';
+
+}
+
+function debug_to_console($data, $context = 'Debug in Console') {
+    ob_start();
+
+    $output = 'console.info(\'' . $context . ':\');';
+    $output .= 'console.log(' . json_encode($data) . ');';
+    $output = sprintf('<script>%s</script>', $output);
+
+    echo $output;
+}
+
+function parse_avantlink_data($feed_url) {
+    $response = wp_remote_get($feed_url);
+
+    if (is_wp_error($response)) {
+        // Handle the error gracefully
+        return 'Failed to retrieve Avantlink data: ' . $response->get_error_message();
+    }
+
+    // Check if response code is 200 (OK)
+    $response_code = wp_remote_retrieve_response_code($response);
+    if ($response_code !== 200) {
+        return 'Failed to retrieve Avantlink data. HTTP response code: ' . $response_code;
+    }
+
+    $xml = simplexml_load_string(wp_remote_retrieve_body($response));
+
+    if (!$xml) {
+        return 'Failed to parse Avantlink data.';
+    }
+
+    $products = array();
+
+	foreach ($xml->Product as $product) {
+        $product_data = array(
+            'SKU' => (string)$product->SKU,
+            'Manufacturer_Id' => (string)$product->Manufacturer_Id,
+            'Brand_Name' => (string)$product->Brand_Name,
+            'Product_Name' => (string)$product->Product_Name,
+            'Long_Description' => (string)$product->Long_Description,
+            'Short_Description' => (string)$product->Short_Description,
+            'Category' => (string)$product->Category,
+            'SubCategory' => (string)$product->SubCategory,
+            'Product_Group' => (string)$product->Product_Group,
+            'Thumb_URL' => (string)$product->Thumb_URL,
+            'Image_URL' => (string)$product->Image_URL,
+            'Buy_Link' => (string)$product->Buy_Link,
+            'Retail_Price' => (float)$product->Retail_Price,
+            'Sale_Price' => (float)$product->Sale_Price,
+            'UPC' => (string)$product->UPC,
+            'Medium_Image_URL' => (string)$product->Medium_Image_URL,
+            // Add more fields as needed
+        );
+
+        $products[] = $product_data;
+    }
+
+    return $products;
+}
+
+
+if (is_array($parsed_data)) {
+    echo '<pre>';
+    print_r($parsed_data);
+    echo '</pre>';
+} else {
+    echo $parsed_data; // Output error message
+}
+
+function display_avantlink_data() {
+    // Fetch and parse data from Avantlink datafeed
+    $feed_url = 'https://datafeed.avantlink.com/download_feed.php?id=312829&auth=0c817f93c46a51e7a945310857820072';
+    $parsed_data = parse_avantlink_data($feed_url);
+
+    // Display data in the admin area
+    ?>
+    <div class="wrap">
+        <h1>Avantlink Data</h1>
+        <div class="product-cards">
+            <?php if (is_array($parsed_data) && !empty($parsed_data)): ?>
+                <?php foreach ($parsed_data as $product): ?>
+                    <div class="product-card">
+                        <h2><?php echo esc_html($product['Product_Name']); ?></h2>
+                        <div class="product-image">
+                            <img src="<?php echo esc_url($product['Image_URL']); ?>" alt="<?php echo esc_attr($product['Product_Name']); ?>">
+                        </div>
+                        <div class="product-details">
+                            <p><strong>Retail Price:</strong> $<?php echo esc_html($product['Retail_Price']); ?></p>
+                            <p><strong>Sale Price:</strong> $<?php echo esc_html($product['Sale_Price']); ?></p>
+                            <!-- Add more product details as needed -->
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <p>No data available or error retrieving data.</p>
+            <?php endif; ?>
+        </div>
+    </div>
+    <?php
+}
+
+// Hook into the admin menu to add the custom admin page
+add_action('admin_menu', 'add_avantlink_admin_page');
+function add_avantlink_admin_page() {
+    add_menu_page(
+        'Avantlink Data',
+        'Avantlink Data',
+        'manage_options',
+        'avantlink-data',
+        'display_avantlink_data'
+    );
+}
+
+?>
