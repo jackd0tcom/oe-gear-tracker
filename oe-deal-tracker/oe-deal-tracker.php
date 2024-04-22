@@ -1,4 +1,5 @@
 <?php
+
 /**
  *
  * @link              https://jackballdev.com
@@ -19,7 +20,7 @@
  */
 
 // If this file is called directly, abort.
-if ( ! defined( 'WPINC' ) ) {
+if (!defined('WPINC')) {
 	die;
 }
 
@@ -28,14 +29,15 @@ if ( ! defined( 'WPINC' ) ) {
  * Start at version 1.0.0 and use SemVer - https://semver.org
  * Rename this for your plugin and update it as you release new versions.
  */
-define( 'OE_DEAL_TRACKER_VERSION', '1.0.0' );
+define('OE_DEAL_TRACKER_VERSION', '1.0.0');
 
 /**
  * The code that runs during plugin activation.
  * This action is documented in includes/class-oe-deal-tracker-activator.php
  */
-function activate_oe_deal_tracker() {
-	require_once plugin_dir_path( __FILE__ ) . 'includes/class-oe-deal-tracker-activator.php';
+function activate_oe_deal_tracker()
+{
+	require_once plugin_dir_path(__FILE__) . 'includes/class-oe-deal-tracker-activator.php';
 	Oe_Deal_Tracker_Activator::activate();
 }
 
@@ -43,19 +45,20 @@ function activate_oe_deal_tracker() {
  * The code that runs during plugin deactivation.
  * This action is documented in includes/class-oe-deal-tracker-deactivator.php
  */
-function deactivate_oe_deal_tracker() {
-	require_once plugin_dir_path( __FILE__ ) . 'includes/class-oe-deal-tracker-deactivator.php';
+function deactivate_oe_deal_tracker()
+{
+	require_once plugin_dir_path(__FILE__) . 'includes/class-oe-deal-tracker-deactivator.php';
 	Oe_Deal_Tracker_Deactivator::deactivate();
 }
 
-register_activation_hook( __FILE__, 'activate_oe_deal_tracker' );
-register_deactivation_hook( __FILE__, 'deactivate_oe_deal_tracker' );
+register_activation_hook(__FILE__, 'activate_oe_deal_tracker');
+register_deactivation_hook(__FILE__, 'deactivate_oe_deal_tracker');
 
 /**
  * The core plugin class that is used to define internationalization,
  * admin-specific hooks, and public-facing site hooks.
  */
-require plugin_dir_path( __FILE__ ) . 'includes/class-oe-deal-tracker.php';
+require plugin_dir_path(__FILE__) . 'includes/class-oe-deal-tracker.php';
 
 /**
  * Begins execution of the plugin.
@@ -66,10 +69,12 @@ require plugin_dir_path( __FILE__ ) . 'includes/class-oe-deal-tracker.php';
  *
  * @since    1.0.0
  */
-function run_oe_deal_tracker() {
+function run_oe_deal_tracker()
+{
 
 	$plugin = new Oe_Deal_Tracker();
 	$plugin->run();
-
 }
 run_oe_deal_tracker();
+
+require_once plugin_dir_path(__FILE__) . 'db-functions.php';

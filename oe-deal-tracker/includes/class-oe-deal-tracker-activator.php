@@ -20,7 +20,8 @@
  * @subpackage Oe_Deal_Tracker/includes
  * @author     Jack Ball <jackballdev@gmail.com>
  */
-class Oe_Deal_Tracker_Activator {
+class Oe_Deal_Tracker_Activator
+{
 
 	/**
 	 * Short Description. (use period)
@@ -29,8 +30,7 @@ class Oe_Deal_Tracker_Activator {
 	 *
 	 * @since    1.0.0
 	 */
-	public static function activate() {
-
+	public static function activate()
+	{
 	}
-
 }

@@ -189,6 +189,56 @@ function parse_avantlink_data($feed_url)
     return $products;
 }
 
+function parse_avantlink_product_data($sku, $feed_url)
+{
+    $response = wp_remote_get($feed_url);
+
+    if (is_wp_error($response)) {
+        // Handle the error gracefully
+        return 'Failed to retrieve Avantlink data: ' . $response->get_error_message();
+    }
+
+    // Check if response code is 200 (OK)
+    $response_code = wp_remote_retrieve_response_code($response);
+    if ($response_code !== 200) {
+        return 'Failed to retrieve Avantlink data. HTTP response code: ' . $response_code;
+    }
+
+    $json = json_decode(wp_remote_retrieve_body($response));
+
+    // echo '<pre>';
+    // print_r($json);
+    // echo '</pre>';
+
+    if (!$json) {
+        return 'Failed to parse Avantlink data.';
+    }
+
+    foreach ($json as $product) {
+        if (isset($product->SKU) && $product->SKU === $sku) {
+            $product_data = array(
+                'SKU' => isset($product->SKU) ? (string)$product->SKU : '',
+                'Manufacturer_Id' => isset($product->Manufacturer_Id) ? (string)$product->Manufacturer_Id : '',
+                'Product_Name' => isset($product->Product_Name) ? (string)$product->Product_Name : '',
+                'Brand' => isset($product->Brand) ? (string)$product->Brand : '',
+                'Retail_Price' => isset($product->Retail_Price) ? (float)$product->Retail_Price : 0.0,
+                'Sale_Price' => isset($product->Sale_Price) ? (float)$product->Sale_Price : 0.0,
+                'Short_Description' => isset($product->Short_Description) ? (string)$product->Short_Description : '',
+                'Long_Description' => isset($product->Long_Description) ? (string)$product->Long_Description : '',
+                'Small_Image_URL' => isset($product->Small_Image_URL) ? (string)$product->Small_Image_URL : '',
+                'Large_Image_URL' => isset($product->Large_Image_URL) ? (string)$product->Large_Image_URL : '',
+                'Buy_URL' => isset($product->Buy_URL) ? (string)$product->Buy_URL : '',
+                'Percent_Off' => isset($product->Percent_Off) ? (string)$product->Percent_Off : '',
+                'Merchant Name' => isset($product->{'Merchant Name'}) ? (string)$product->{'Merchant Name'} : '',
+            );
+            return $product_data;
+        }
+    }
+
+    return 'Product not found.';
+}
+
+
 add_action('admin_menu', 'add_chooser_page');
 function add_chooser_page()
 {
@@ -210,10 +260,24 @@ function display_chooser_page()
     if (isset($_POST['save_selected_products'])) {
         // Handle form submission and save selected products
         if (isset($_POST['selected_products'])) {
+            global $wpdb;
             $selected_products = $_POST['selected_products'];
-            // Save selected products to database or perform any other action
-            // For now, let's just display the selected products
-            echo '<div class="updated"><p>Selected products: ' . implode(', ', $selected_products) . '</p></div>';
+            // Save selected products to database
+            $table_name = $wpdb->prefix . 'selected_products';
+            foreach ($selected_products as $selected_product) {
+                $product_data = parse_avantlink_product_data($selected_product, $feed_url); // Assuming you have a function to get product data by SKU
+                $wpdb->insert(
+                    $table_name,
+                    array(
+                        'product_id' => $product_data['SKU'],
+                        'product_name' => $product_data['Product_Name'],
+                        'image_url' => $product_data['Large_Image_URL'],
+                        'price' => $product_data['Sale_Price'],
+                    )
+                );
+            }
+            // Confirmation message
+            echo '<div class="updated"><p>Selected products saved!</p></div>';
         } else {
             echo '<div class="error"><p>No products selected!</p></div>';
         }
@@ -223,15 +287,7 @@ function display_chooser_page()
     $feed_url = 'https://www.avantlink.com/api.php?module=DotdFeed&merchant_ids=10086|13273|10086&affiliate_id=185881&website_id=236121&output=json';
     $parsed_data = parse_avantlink_data($feed_url);
 
-    // Display selected products
-    if (isset($selected_products)) {
-        echo '<h2>Selected Products:</h2>';
-        echo '<ul>';
-        foreach ($selected_products as $selected_product) {
-            echo '<li>' . $selected_product . ' <button class="delete-selected" data-product="' . $selected_product . '">Delete</button></li>';
-        }
-        echo '</ul>';
-    }
+    // Display the form
 ?>
     <div class="wrap">
         <h1>Outdoor Empire Gear Tracker - Chooser</h1>
@@ -276,9 +332,73 @@ function display_chooser_page()
             }
         });
     </script>
-<?php
+    <?php
 }
 
+
+// Display selected products as product cards
+function display_selected_products()
+{
+    // Get selected products from the database
+    $selected_products = get_selected_products();
+
+    if ($selected_products) {
+    ?>
+        <div class="selected-products">
+            <h2>Selected Products</h2>
+            <div class="product-cards">
+                <?php foreach ($selected_products as $product) : ?>
+                    <div class="product-card">
+                        <h3><?php echo esc_html($product['product_name']); ?></h3>
+                        <img src="<?php echo esc_url($product['image_url']); ?>" alt="<?php echo esc_attr($product['product_name']); ?>">
+                        <p><strong>Price:</strong> $<?php echo esc_html($product['price']); ?></p>
+                        <!-- Add more product details as needed -->
+                        <button class="delete-product" data-product-id="<?php echo esc_attr($product['product_id']); ?>">Delete</button>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+<?php
+    } else {
+        echo '<p>No selected products.</p>';
+    }
+}
+
+
+function save_selected_products($selected_products)
+{
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'selected_products';
+
+    foreach ($selected_products as $product_id) {
+        $wpdb->insert(
+            $table_name,
+            array(
+                'product_id' => $product_id
+            )
+        );
+    }
+}
+
+function delete_selected_product($product_id)
+{
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'selected_products';
+    $wpdb->delete(
+        $table_name,
+        array(
+            'product_id' => $product_id,
+        )
+    );
+}
+
+function get_selected_products()
+{
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'selected_products';
+    $selected_products = $wpdb->get_results("SELECT * FROM $table_name", ARRAY_A);
+    return $selected_products;
+}
 
 
 ?>
