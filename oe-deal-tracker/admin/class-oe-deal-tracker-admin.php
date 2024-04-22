@@ -20,92 +20,93 @@
  * @subpackage Oe_Deal_Tracker/admin
  * @author     Jack Ball <jackballdev@gmail.com>
  */
-class Oe_Deal_Tracker_Admin {
+class Oe_Deal_Tracker_Admin
+{
 
-	/**
-	 * The ID of this plugin.
-	 *
-	 * @since    1.0.0
-	 * @access   private
-	 * @var      string    $plugin_name    The ID of this plugin.
-	 */
-	private $plugin_name;
+    /**
+     * The ID of this plugin.
+     *
+     * @since    1.0.0
+     * @access   private
+     * @var      string    $plugin_name    The ID of this plugin.
+     */
+    private $plugin_name;
 
-	/**
-	 * The version of this plugin.
-	 *
-	 * @since    1.0.0
-	 * @access   private
-	 * @var      string    $version    The current version of this plugin.
-	 */
-	private $version;
+    /**
+     * The version of this plugin.
+     *
+     * @since    1.0.0
+     * @access   private
+     * @var      string    $version    The current version of this plugin.
+     */
+    private $version;
 
-	/**
-	 * Initialize the class and set its properties.
-	 *
-	 * @since    1.0.0
-	 * @param      string    $plugin_name       The name of this plugin.
-	 * @param      string    $version    The version of this plugin.
-	 */
-	public function __construct( $plugin_name, $version ) {
+    /**
+     * Initialize the class and set its properties.
+     *
+     * @since    1.0.0
+     * @param      string    $plugin_name       The name of this plugin.
+     * @param      string    $version    The version of this plugin.
+     */
+    public function __construct($plugin_name, $version)
+    {
 
-		$this->plugin_name = $plugin_name;
-		$this->version = $version;
+        $this->plugin_name = $plugin_name;
+        $this->version = $version;
+    }
 
-	}
+    /**
+     * Register the stylesheets for the admin area.
+     *
+     * @since    1.0.0
+     */
+    public function enqueue_styles()
+    {
 
-	/**
-	 * Register the stylesheets for the admin area.
-	 *
-	 * @since    1.0.0
-	 */
-	public function enqueue_styles() {
+        /**
+         * This function is provided for demonstration purposes only.
+         *
+         * An instance of this class should be passed to the run() function
+         * defined in Oe_Deal_Tracker_Loader as all of the hooks are defined
+         * in that particular class.
+         *
+         * The Oe_Deal_Tracker_Loader will then create the relationship
+         * between the defined hooks and the functions defined in this
+         * class.
+         */
 
-		/**
-		 * This function is provided for demonstration purposes only.
-		 *
-		 * An instance of this class should be passed to the run() function
-		 * defined in Oe_Deal_Tracker_Loader as all of the hooks are defined
-		 * in that particular class.
-		 *
-		 * The Oe_Deal_Tracker_Loader will then create the relationship
-		 * between the defined hooks and the functions defined in this
-		 * class.
-		 */
+        wp_enqueue_style($this->plugin_name, plugin_dir_url(__FILE__) . 'css/oe-deal-tracker-admin.css', array(), $this->version, 'all');
+    }
 
-		wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/oe-deal-tracker-admin.css', array(), $this->version, 'all' );
+    /**
+     * Register the JavaScript for the admin area.
+     *
+     * @since    1.0.0
+     */
+    public function enqueue_scripts()
+    {
 
-	}
+        /**
+         * This function is provided for demonstration purposes only.
+         *
+         * An instance of this class should be passed to the run() function
+         * defined in Oe_Deal_Tracker_Loader as all of the hooks are defined
+         * in that particular class.
+         *
+         * The Oe_Deal_Tracker_Loader will then create the relationship
+         * between the defined hooks and the functions defined in this
+         * class.
+         */
 
-	/**
-	 * Register the JavaScript for the admin area.
-	 *
-	 * @since    1.0.0
-	 */
-	public function enqueue_scripts() {
-
-		/**
-		 * This function is provided for demonstration purposes only.
-		 *
-		 * An instance of this class should be passed to the run() function
-		 * defined in Oe_Deal_Tracker_Loader as all of the hooks are defined
-		 * in that particular class.
-		 *
-		 * The Oe_Deal_Tracker_Loader will then create the relationship
-		 * between the defined hooks and the functions defined in this
-		 * class.
-		 */
-
-		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/oe-deal-tracker-admin.js', array( 'jquery' ), $this->version, false );
-
-	}
-
+        wp_enqueue_script($this->plugin_name, plugin_dir_url(__FILE__) . 'js/oe-deal-tracker-admin.js', array('jquery'), $this->version, false);
+    }
 }
 
 // Hook into the admin menu
 add_action('admin_menu', 'outdoor_empire_deals_admin_menu');
 
-function outdoor_empire_deals_admin_menu() {
+function outdoor_empire_deals_admin_menu()
+{
     add_menu_page(
         'Outdoor Empire Deal Tracker',
         'Outdoor Empire Deal Tracker',
@@ -117,16 +118,17 @@ function outdoor_empire_deals_admin_menu() {
     );
 }
 
-function outdoor_empire_deals_admin_page_content() {
+function outdoor_empire_deals_admin_page_content()
+{
     if (!current_user_can('manage_options')) {
         return;
     }
 
     echo '<h1>Outdoor Empire Deal Tracker Admin</h1>';
-
 }
 
-function debug_to_console($data, $context = 'Debug in Console') {
+function debug_to_console($data, $context = 'Debug in Console')
+{
     ob_start();
 
     $output = 'console.info(\'' . $context . ':\');';
@@ -136,7 +138,8 @@ function debug_to_console($data, $context = 'Debug in Console') {
     echo $output;
 }
 
-function parse_avantlink_data($feed_url) {
+function parse_avantlink_data($feed_url)
+{
     $response = wp_remote_get($feed_url);
 
     if (is_wp_error($response)) {
@@ -150,34 +153,35 @@ function parse_avantlink_data($feed_url) {
         return 'Failed to retrieve Avantlink data. HTTP response code: ' . $response_code;
     }
 
-    $xml = simplexml_load_string(wp_remote_retrieve_body($response));
+    $json = json_decode(wp_remote_retrieve_body($response));
 
-    if (!$xml) {
+    // echo '<pre>';
+    // print_r($json);
+    // echo '</pre>';
+
+    if (!$json) {
         return 'Failed to parse Avantlink data.';
     }
 
     $products = array();
 
-	foreach ($xml->Product as $product) {
+    foreach ($json as $product) {
         $product_data = array(
-            'SKU' => (string)$product->SKU,
-            'Manufacturer_Id' => (string)$product->Manufacturer_Id,
-            'Brand_Name' => (string)$product->Brand_Name,
-            'Product_Name' => (string)$product->Product_Name,
-            'Long_Description' => (string)$product->Long_Description,
-            'Short_Description' => (string)$product->Short_Description,
-            'Category' => (string)$product->Category,
-            'SubCategory' => (string)$product->SubCategory,
-            'Product_Group' => (string)$product->Product_Group,
-            'Thumb_URL' => (string)$product->Thumb_URL,
-            'Image_URL' => (string)$product->Image_URL,
-            'Buy_Link' => (string)$product->Buy_Link,
-            'Retail_Price' => (float)$product->Retail_Price,
-            'Sale_Price' => (float)$product->Sale_Price,
-            'UPC' => (string)$product->UPC,
-            'Medium_Image_URL' => (string)$product->Medium_Image_URL,
-            // Add more fields as needed
+            'SKU' => isset($product->SKU) ? (string)$product->SKU : '',
+            'Manufacturer_Id' => isset($product->Manufacturer_Id) ? (string)$product->Manufacturer_Id : '',
+            'Product_Name' => isset($product->Product_Name) ? (string)$product->Product_Name : '',
+            'Brand' => isset($product->Brand) ? (string)$product->Brand : '',
+            'Retail_Price' => isset($product->Retail_Price) ? (float)$product->Retail_Price : 0.0,
+            'Sale_Price' => isset($product->Sale_Price) ? (float)$product->Sale_Price : 0.0,
+            'Short_Description' => isset($product->Short_Description) ? (string)$product->Short_Description : '',
+            'Long_Description' => isset($product->Long_Description) ? (string)$product->Long_Description : '',
+            'Small_Image_URL' => isset($product->Small_Image_URL) ? (string)$product->Small_Image_URL : '',
+            'Large_Image_URL' => isset($product->Large_Image_URL) ? (string)$product->Large_Image_URL : '',
+            'Buy_URL' => isset($product->Buy_URL) ? (string)$product->Buy_URL : '',
+            'Percent_Off' => isset($product->Percent_Off) ? (string)$product->Percent_Off : '',
+            'Merchant Name' => isset($product->{'Merchant Name'}) ? (string)$product->{'Merchant Name'} : '',
         );
+
 
         $products[] = $product_data;
     }
@@ -185,57 +189,96 @@ function parse_avantlink_data($feed_url) {
     return $products;
 }
 
-
-if (is_array($parsed_data)) {
-    echo '<pre>';
-    print_r($parsed_data);
-    echo '</pre>';
-} else {
-    echo $parsed_data; // Output error message
-}
-
-function display_avantlink_data() {
-    // Fetch and parse data from Avantlink datafeed
-    $feed_url = 'https://datafeed.avantlink.com/download_feed.php?id=312829&auth=0c817f93c46a51e7a945310857820072';
-    $parsed_data = parse_avantlink_data($feed_url);
-
-    // Display data in the admin area
-    ?>
-    <div class="wrap">
-        <h1>Avantlink Data</h1>
-        <div class="product-cards">
-            <?php if (is_array($parsed_data) && !empty($parsed_data)): ?>
-                <?php foreach ($parsed_data as $product): ?>
-                    <div class="product-card">
-                        <h2><?php echo esc_html($product['Product_Name']); ?></h2>
-                        <div class="product-image">
-                            <img src="<?php echo esc_url($product['Image_URL']); ?>" alt="<?php echo esc_attr($product['Product_Name']); ?>">
-                        </div>
-                        <div class="product-details">
-                            <p><strong>Retail Price:</strong> $<?php echo esc_html($product['Retail_Price']); ?></p>
-                            <p><strong>Sale Price:</strong> $<?php echo esc_html($product['Sale_Price']); ?></p>
-                            <!-- Add more product details as needed -->
-                        </div>
-                    </div>
-                <?php endforeach; ?>
-            <?php else: ?>
-                <p>No data available or error retrieving data.</p>
-            <?php endif; ?>
-        </div>
-    </div>
-    <?php
-}
-
-// Hook into the admin menu to add the custom admin page
-add_action('admin_menu', 'add_avantlink_admin_page');
-function add_avantlink_admin_page() {
-    add_menu_page(
-        'Avantlink Data',
-        'Avantlink Data',
-        'manage_options',
-        'avantlink-data',
-        'display_avantlink_data'
+add_action('admin_menu', 'add_chooser_page');
+function add_chooser_page()
+{
+    add_submenu_page(
+        'oe-deal-tracker', // Parent menu slug
+        'Chooser', // Page title
+        'Chooser', // Menu title
+        'manage_options', // Capability required
+        'oe-deal-tracker-chooser', // Menu slug
+        'display_chooser_page' // Callback function
     );
 }
+
+
+// Callback function to display Chooser page
+function display_chooser_page()
+{
+    // Check if form is submitted and process selected products
+    if (isset($_POST['save_selected_products'])) {
+        // Handle form submission and save selected products
+        if (isset($_POST['selected_products'])) {
+            $selected_products = $_POST['selected_products'];
+            // Save selected products to database or perform any other action
+            // For now, let's just display the selected products
+            echo '<div class="updated"><p>Selected products: ' . implode(', ', $selected_products) . '</p></div>';
+        } else {
+            echo '<div class="error"><p>No products selected!</p></div>';
+        }
+    }
+
+    // Display Avantlink data on Chooser page
+    $feed_url = 'https://www.avantlink.com/api.php?module=DotdFeed&merchant_ids=10086|13273|10086&affiliate_id=185881&website_id=236121&output=json';
+    $parsed_data = parse_avantlink_data($feed_url);
+
+    // Display selected products
+    if (isset($selected_products)) {
+        echo '<h2>Selected Products:</h2>';
+        echo '<ul>';
+        foreach ($selected_products as $selected_product) {
+            echo '<li>' . $selected_product . ' <button class="delete-selected" data-product="' . $selected_product . '">Delete</button></li>';
+        }
+        echo '</ul>';
+    }
+?>
+    <div class="wrap">
+        <h1>Outdoor Empire Gear Tracker - Chooser</h1>
+        <p>Select products from the Avantlink data:</p>
+        <form method="post">
+            <div class="product-cards">
+                <?php if (is_array($parsed_data) && !empty($parsed_data)) : ?>
+                    <?php foreach ($parsed_data as $product) : ?>
+                        <div class="product-card">
+                            <label>
+                                <input type="checkbox" name="selected_products[]" value="<?php echo esc_attr($product['SKU']); ?>">
+                                <h2><?php echo esc_html($product['Product_Name']); ?></h2>
+                                <div class="product-image">
+                                    <img src="<?php echo esc_url($product['Large_Image_URL']); ?>" alt="<?php echo esc_attr($product['Product_Name']); ?>">
+                                </div>
+                                <div class="product-details">
+                                    <p><strong>Retail Price:</strong> $<?php echo esc_html($product['Retail_Price']); ?></p>
+                                    <p><strong>Sale Price:</strong> $<?php echo esc_html($product['Sale_Price']); ?></p>
+                                    <p><strong>Merchant:</strong> <?php echo esc_html($product['Merchant Name']); ?></p>
+                                    <p><strong>Percent Off:</strong> <?php echo esc_html($product['Percent_Off']); ?>%</p>
+                                    <!-- Add more product details as needed -->
+                                </div>
+                            </label>
+                        </div>
+                    <?php endforeach; ?>
+                <?php else : ?>
+                    <p>No data available or error retrieving data.</p>
+                <?php endif; ?>
+            </div>
+            <input type="submit" name="save_selected_products" class="button button-primary" value="Save Selected Products">
+        </form>
+    </div>
+    <script>
+        // JavaScript to handle deletion of selected products
+        document.addEventListener('click', function(e) {
+            if (e.target && e.target.classList.contains('delete-selected')) {
+                e.preventDefault();
+                var productToDelete = e.target.dataset.product;
+                // Perform deletion action here, such as removing from database
+                // For now, let's just remove it from the list
+                e.target.parentElement.remove();
+            }
+        });
+    </script>
+<?php
+}
+
+
 
 ?>

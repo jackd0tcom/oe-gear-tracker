@@ -2,3 +2,19 @@
  * All of the CSS for your admin-specific functionality should be
  * included in this file.
  */
+
+ .product-cards {
+    display: flex;
+    flex-wrap: wrap;
+ }
+ .product-card {
+    padding: 10px;
+    width: 300px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+ }
+ .product-image img {
+    height: 200px;
+ }
